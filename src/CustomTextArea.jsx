@@ -470,24 +470,14 @@ const CustomTextArea = (props) => {
 
   return (
     <>
-      {isAllSelected && <h1>All Selected</h1>}
-      {isTextSelected && (
-        <h1>
-          [Start]:{startPosition} [End]:{endPosition}
-        </h1>
-      )}
-      <div
-        className="pause-button"
-        onClick={() => {
-          setValue("");
-        }}
-      >
-        Format
-      </div>
+      <h4>All Selected: {isAllSelected ? "true" : "false"}</h4>
+      <h4>Text selected: {isTextSelected ? "true" : "false"}</h4>
+      <h4>Start position: {startPosition}</h4>
+      <h4>End position: {endPosition}</h4>
       <div
         style={{
           fontFamily: "'Poppins'",
-          width: "30%",
+          width: "100%",
           color: "white",
           height: 183,
           padding: "12.5px 12px 30px 12px",
@@ -495,7 +485,7 @@ const CustomTextArea = (props) => {
           border: "1px solid rgba(255, 255, 255, 0.2)",
           borderRadius: "8px",
           boxSizing: "border-box",
-          margin: "16px 0",
+          margin: "16px auto",
           marginBottom: 1,
           marginTop: 27.5,
           overflowY: "auto",

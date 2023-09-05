@@ -1,8 +1,29 @@
-.pause-button {
+body {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #191d26;
+}
+
+.main {
   width: 30%;
+  height: 100vh;
+  padding: 2rem 0 0;
+  margin: 0 auto;
+  box-sizing: border-box;
+  /* text-align: center; */
+  color: white;
+}
+
+.pause-button {
+  width: 100%;
   cursor: pointer;
   color: white;
-  margin-top: 1rem;
+  margin: 1rem auto;
   padding: 0.5rem;
   background: #20232A;
   border: 1px solid #4E5159;

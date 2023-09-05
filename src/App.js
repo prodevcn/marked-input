@@ -13,16 +13,16 @@ const App = () => {
 
   const onPauseButtonClick = () => {
     if (value.trim().length === 0) {
-      const newValue = " @[Pause 0.2s](default:0) ";
+      const newValue = "@[Pause 0.2s](default:0)";
       setValue(newValue);
       setPausePosition(newValue.length);
       setCursorPosition(newValue.length);
     } else {
       const beforeCursor = value.substring(0, cursorPosition).trim();
       const afterCursor = value.substring(cursorPosition, value.length).trim();
-      setValue(beforeCursor + " @[Pause 0.2s](default:0) " + afterCursor);
+      setValue(beforeCursor + "@[Pause 0.2s](default:0)" + afterCursor);
 
-      const prefix = beforeCursor + " @[Pause 0.2s](default:0) ";
+      const prefix = beforeCursor + "@[Pause 0.2s](default:0)";
       setPausePosition(prefix.length);
       setCursorPosition(prefix.length);
     }
@@ -32,7 +32,7 @@ const App = () => {
   };
 
   return (
-    <>
+    <div className="main">
       <h4>Audio Text : {audioText}</h4>
       <h4>Value : {value}</h4>
       <CustomTextArea
@@ -53,7 +53,7 @@ const App = () => {
       >
         Pause
       </div>
-    </>
+    </div>
   );
 };
 
