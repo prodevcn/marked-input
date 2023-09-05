@@ -55,6 +55,27 @@ const CustomTextArea = (props) => {
     return caretOffset;
   };
 
+  const findLastEditablePosition = (originalText, updatedText) => {
+    // Deleted a character
+    if (updatedText.length < originalText.length) {
+      for (let i = 0; i < originalText.length; i++) {
+        if (updatedText[i] !== originalText[i]) {
+          return i;
+        }
+      }
+      // Added a character
+    } else if (originalText.length < updatedText.length) {
+      for (let i = 0; i < updatedText.length; i++) {
+        if (updatedText[i] !== originalText[i]) {
+          // console.log(updatedText[i], originalText[i]);
+          return i + 1;
+        }
+      }
+    } else {
+      return originalText.length + 1;
+    }
+  };
+
   const putCursorAtMiddle = useCallback(() => {
     if (!inputRef.current) return;
 
@@ -131,31 +152,9 @@ const CustomTextArea = (props) => {
   }, [setCursorPosition, value.length]);
 
   const onChange = (text) => {
-    console.log("[function_call]:[on_change]:[text]:", text);
     const position = findLastEditablePosition(value, text);
     setCursorPosition(position);
     setValue(text);
-  };
-
-  const findLastEditablePosition = (originalText, updatedText) => {
-    // Deleted a character
-    if (updatedText.length < originalText.length) {
-      for (let i = 0; i < originalText.length; i++) {
-        if (updatedText[i] !== originalText[i]) {
-          return i;
-        }
-      }
-      // Added a character
-    } else if (originalText.length < updatedText.length) {
-      for (let i = 0; i < updatedText.length; i++) {
-        if (updatedText[i] !== originalText[i]) {
-          // console.log(updatedText[i], originalText[i]);
-          return i + 1;
-        }
-      }
-    } else {
-      return originalText.length + 1;
-    }
   };
 
   const RemovableMark = () => {
@@ -239,31 +238,108 @@ const CustomTextArea = (props) => {
       console.log("[event]:[key_down]");
 
       if (event.ctrlKey && event.key === "a") {
-        setAllSelected(true);
-      } else if (checkApple() && event.metaKey && event.key === "a") {
-        console.log("[event]:[key_down]:[cmd + a]");
+        console.log("[event]:[key_ctrl_a]");
+
         event.preventDefault();
         const container = inputRef.current.container;
         const spanElements = container.querySelectorAll(".mk-input span");
+
+        if (spanElements.length === 1 && spanElements[0].firstChild === null)
+          return;
+
+        const startNode =
+          spanElements[0].firstChild ?? spanElements[1].firstChild;
+        const endNode =
+          spanElements[spanElements.length - 1].firstChild ??
+          spanElements[spanElements.length - 2].firstChild;
+
+        const range = document.createRange();
+        range.setStart(startNode, 0);
+        range.setEnd(endNode, 1);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        setAllSelected(true);
+      } else if (event.ctrlKey && event.key === "c") {
+        event.preventDefault();
+        if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+          navigator.clipboard.writeText(
+            value.slice(startPosition, endPosition + 1)
+          );
+        } else if (isAllSelected) {
+          navigator.clipboard.writeText(value);
+        }
+      } else if (event.ctrlKey && event.key === "x") {
+        event.preventDefault();
+        if (isAllSelected) {
+          navigator.clipboard.writeText(value);
+          setValue("");
+          setAllSelected(false);
+        } else if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+          navigator.clipboard.writeText(
+            value.slice(startPosition, endPosition + 1)
+          );
+          setValue(value.slice(0, startPosition) + value.slice(endPosition));
+          setTextSelected(false);
+          setStartPosition(0);
+          setEndPosition(0);
+        }
+      } else if (checkApple() && event.metaKey && event.key === "a") {
+        console.log("[event]:[cmd + a]");
+
+        event.preventDefault();
+        const container = inputRef.current.container;
+        const spanElements = container.querySelectorAll(".mk-input span");
+
+        if (spanElements.length === 1 && spanElements[0].firstChild === null)
+          return;
+
         const startNode = spanElements[0].firstChild;
         const endNode = spanElements[spanElements.length - 1].firstChild;
 
-        var range = document.createRange();
+        const range = document.createRange();
         range.setStart(startNode, 0);
         range.setEnd(endNode, endNode.length);
 
-        var selection = window.getSelection();
+        const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
         setAllSelected(true);
+      } else if (checkApple() && event.metaKey && event.key === "c") {
+        event.preventDefault();
+        if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+          navigator.clipboard.writeText(
+            value.slice(startPosition, endPosition + 1)
+          );
+        } else if (isAllSelected) {
+          navigator.clipboard.writeText(value);
+        }
+      } else if (checkApple() && event.metaKey && event.key === "x") {
+        event.preventDefault();
+        if (isAllSelected) {
+          navigator.clipboard.writeText(value);
+          setValue("");
+          setAllSelected(false);
+        } else if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+          navigator.clipboard.writeText(
+            value.slice(startPosition, endPosition + 1)
+          );
+          setValue(value.slice(0, startPosition) + value.slice(endPosition));
+          setTextSelected(false);
+          setStartPosition(0);
+          setEndPosition(0);
+        }
       } else if (event.key === "Delete") {
         console.log("[event]:[key_down]:[delete]");
         console.log("[select_all_text]:", isAllSelected);
         if (isAllSelected) {
           console.log("[selected_all_text]");
+
+          event.preventDefault();
           setValue("");
           setAllSelected(false);
-          // event.preventDefault();
         } else if (isTextSelected && startPosition && endPosition) {
           event.preventDefault();
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
@@ -271,11 +347,11 @@ const CustomTextArea = (props) => {
           setStartPosition(null);
           setEndPosition(null);
         } else {
-          console.log("###############################");
+          console.log("[event]:[text_is_not_selected]");
         }
       } else if (event.key === "Backspace") {
         if (isAllSelected) {
-          console.log("*************");
+          console.log("[selected_all_text]");
           event.preventDefault();
           setValue("");
           setAllSelected(false);
@@ -286,7 +362,7 @@ const CustomTextArea = (props) => {
           setStartPosition(null);
           setEndPosition(null);
         } else {
-          console.log("###############################");
+          console.log("[event]:[text_is_not_selected]");
         }
       }
     },
@@ -398,69 +474,69 @@ const CustomTextArea = (props) => {
   };
 
   /** add click listener */
-  useEffect(() => {
-    if (!inputRef.current) return;
+  // useEffect(() => {
+  //   if (!inputRef.current) return;
 
-    const container = inputRef.current.container;
-    container.addEventListener("click", clickListener);
+  //   const container = inputRef.current.container;
+  //   container.addEventListener("click", clickListener);
 
-    return () => {
-      container.removeEventListener("click", clickListener);
-    };
-  }, [inputRef, clickListener]);
+  //   return () => {
+  //     container.removeEventListener("click", clickListener);
+  //   };
+  // }, [inputRef, clickListener]);
 
-  /** add keydown listener */
-  useEffect(() => {
-    if (!inputRef.current) return;
+  // /** add keydown listener */
+  // useEffect(() => {
+  //   if (!inputRef.current) return;
 
-    const container = inputRef.current.container;
-    container.addEventListener("keydown", keyDownListener);
+  //   const container = inputRef.current.container;
+  //   container.addEventListener("keydown", keyDownListener);
 
-    return () => {
-      container.removeEventListener("keydown", keyDownListener);
-    };
-  }, [keyDownListener]);
+  //   return () => {
+  //     container.removeEventListener("keydown", keyDownListener);
+  //   };
+  // }, [keyDownListener]);
 
-  /** add keyup listener */
-  useEffect(() => {
-    if (!inputRef.current) return;
+  // /** add keyup listener */
+  // useEffect(() => {
+  //   if (!inputRef.current) return;
 
-    const container = inputRef.current.container;
-    container.addEventListener("keyup", keyUpListener);
+  //   const container = inputRef.current.container;
+  //   container.addEventListener("keyup", keyUpListener);
 
-    return () => {
-      container.removeEventListener("keyup", keyUpListener);
-    };
-  }, [keyUpListener]);
+  //   return () => {
+  //     container.removeEventListener("keyup", keyUpListener);
+  //   };
+  // }, [keyUpListener]);
 
-  /** add mouse down listener */
-  useEffect(() => {
-    if (!inputRef.current) return;
+  // /** add mouse down listener */
+  // useEffect(() => {
+  //   if (!inputRef.current) return;
 
-    const container = inputRef.current.container;
-    container.addEventListener("mousedown", mouseListener);
+  //   const container = inputRef.current.container;
+  //   container.addEventListener("mousedown", mouseListener);
 
-    return () => {
-      container.removeEventListener("mousedown", mouseListener);
-    };
-  }, [inputRef, value]);
+  //   return () => {
+  //     container.removeEventListener("mousedown", mouseListener);
+  //   };
+  // }, [inputRef, value]);
 
-  useEffect(() => {
-    if (pausePosition === value.length) putCursorAtEndOfDiv();
-    else putCursorAtMiddle();
-  }, [pauseClickCount]);
+  // useEffect(() => {
+  //   if (pausePosition === value.length) putCursorAtEndOfDiv();
+  //   else putCursorAtMiddle();
+  // }, [pauseClickCount]);
 
-  useEffect(() => {
-    if (!shouldUpdateInnerValue) return;
-    if (!inputRef.current) return;
+  // useEffect(() => {
+  //   if (!shouldUpdateInnerValue) return;
+  //   if (!inputRef.current) return;
 
-    const container = inputRef.current.container;
-    const spanElement = container.querySelector(".mk-input span");
+  //   const container = inputRef.current.container;
+  //   const spanElement = container.querySelector(".mk-input span");
 
-    // Update the value of the span element
-    spanElement.textContent = value;
-    setShouldUpdateInnerValue(false);
-  }, [shouldUpdateInnerValue, setShouldUpdateInnerValue, value]);
+  //   // Update the value of the span element
+  //   spanElement.textContent = value;
+  //   setShouldUpdateInnerValue(false);
+  // }, [shouldUpdateInnerValue, setShouldUpdateInnerValue, value]);
 
   useEffect(() => {
     setAudioText(
@@ -470,6 +546,7 @@ const CustomTextArea = (props) => {
 
   return (
     <>
+      <h4>Is editing middle: {isEditingMiddle ? "true" : "false"}</h4>
       <h4>All Selected: {isAllSelected ? "true" : "false"}</h4>
       <h4>Text selected: {isTextSelected ? "true" : "false"}</h4>
       <h4>Start position: {startPosition}</h4>
@@ -494,12 +571,13 @@ const CustomTextArea = (props) => {
           cursor: "text",
         }}
         onClick={() => {
+          console.log("[event]:[click]:[textarea_div]")
           if (isEditingMiddle) return;
           if (value.trim().length === 0) {
             inputRef.current.focus();
             return;
           }
-          putCursorAtEndOfDiv();
+          // putCursorAtEndOfDiv();
         }}
       >
         <MarkedInput

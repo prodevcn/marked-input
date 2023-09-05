@@ -12,23 +12,23 @@ const App = () => {
   const [pausePosition, setPausePosition] = useState(0);
 
   const onPauseButtonClick = () => {
-    if (value.trim().length === 0) {
-      const newValue = "@[Pause 0.2s](default:0)";
-      setValue(newValue);
-      setPausePosition(newValue.length);
-      setCursorPosition(newValue.length);
-    } else {
-      const beforeCursor = value.substring(0, cursorPosition).trim();
-      const afterCursor = value.substring(cursorPosition, value.length).trim();
-      setValue(beforeCursor + "@[Pause 0.2s](default:0)" + afterCursor);
+    // if (value.trim().length === 0) {
+    //   const newValue = "@[Pause 0.2s](default:0)";
+    //   setValue(newValue);
+    //   setPausePosition(newValue.length);
+    //   setCursorPosition(newValue.length);
+    // } else {
+    //   const beforeCursor = value.substring(0, cursorPosition).trim();
+    //   const afterCursor = value.substring(cursorPosition, value.length).trim();
+    //   setValue(beforeCursor + "@[Pause 0.2s](default:0)" + afterCursor);
 
-      const prefix = beforeCursor + "@[Pause 0.2s](default:0)";
-      setPausePosition(prefix.length);
-      setCursorPosition(prefix.length);
-    }
+    //   const prefix = beforeCursor + "@[Pause 0.2s](default:0)";
+    //   setPausePosition(prefix.length);
+    //   setCursorPosition(prefix.length);
+    // }
 
-    setIsTextAreaFocused(false);
-    setPauseClickCount(pauseClickCount + 1);
+    // setIsTextAreaFocused(false);
+    // setPauseClickCount(pauseClickCount + 1);
   };
 
   return (
