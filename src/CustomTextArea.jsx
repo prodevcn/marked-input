@@ -7,12 +7,13 @@ const CustomTextArea = (props) => {
     setValue,
     setAudioText,
     setCursorPosition,
-    shouldUpdateInnerValue = false,
+    shouldUpdateInnerValue,
     setShouldUpdateInnerValue,
     isEditingMiddle,
     setIsEditingMiddle,
-    pausePosition,
+    // pausePosition,
     pauseClickCount,
+    cursorPosition,
   } = props;
 
   const inputRef = useRef(null);
@@ -32,7 +33,7 @@ const CustomTextArea = (props) => {
     var win = doc.defaultView || doc.parentWindow;
     var sel;
 
-    if (typeof win.getSelection != "undefined") {
+    if (typeof win.getSelection !== "undefined") {
       sel = win.getSelection();
 
       if (sel.rangeCount > 0) {
@@ -80,12 +81,13 @@ const CustomTextArea = (props) => {
     if (!inputRef.current) return;
 
     setTimeout(() => {
-      setCursorPosition(pausePosition);
+      // setCursorPosition(cursorPosition);
       inputRef.current.focus();
 
       const container = inputRef.current.container;
       const spanElements = container.querySelectorAll(".mk-input span");
-      const pauseTags = value.substring(0, pausePosition).match(/Pause 0.2s/g);
+      // const pauseTags = value.substring(0, pausePosition).match(/Pause 0.2s/g);
+      const pauseTags = value.substring(0, cursorPosition).match(/Pause 0.2s/g);
       const countOfPause = pauseTags.length;
 
       let count = 0;
@@ -119,9 +121,10 @@ const CustomTextArea = (props) => {
       selection.removeAllRanges();
       selection.addRange(range);
     }, [500]);
-  }, [pausePosition, setCursorPosition, value]);
+  }, [cursorPosition, value]);
 
-  const putCursorAtEndOfDiv = useCallback(() => {
+  const putCursorAtEndOfDiv = () => {
+    console.log("[cursor]:[put_end]");
     if (!inputRef.current) return;
 
     setTimeout(() => {
@@ -149,7 +152,7 @@ const CustomTextArea = (props) => {
 
       setCursorPosition(value.length);
     }, 500);
-  }, [setCursorPosition, value.length]);
+  };
 
   const onChange = (text) => {
     const position = findLastEditablePosition(value, text);
@@ -202,14 +205,15 @@ const CustomTextArea = (props) => {
   /** event listeners */
   const clickListener = useCallback(
     (event) => {
-      console.log("[event]:[mouse_click]");
+      console.log("[event]:[click]");
 
-      if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
-        console.log("[prevent]:[mouse_click]");
-        return;
-      }
+      // if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+      //   console.log("[prevent]:[click]");
+      //   return;
+      // }
 
       const span = event.target;
+      console.log(span);
       const text = span.innerText;
       const position = getCaretCharacterOffsetWithin(span);
       const index = value.indexOf(text);
@@ -220,6 +224,8 @@ const CustomTextArea = (props) => {
         return;
       }
 
+      console.log(index + position);
+
       setCursorPosition(index + position);
       setIsEditingMiddle(true);
     },
@@ -227,9 +233,9 @@ const CustomTextArea = (props) => {
       value,
       setCursorPosition,
       setIsEditingMiddle,
-      isTextSelected,
-      startPosition,
-      endPosition,
+      // isTextSelected,
+      // startPosition,
+      // endPosition,
     ]
   );
 
@@ -474,16 +480,16 @@ const CustomTextArea = (props) => {
   };
 
   /** add click listener */
-  // useEffect(() => {
-  //   if (!inputRef.current) return;
+  useEffect(() => {
+    if (!inputRef.current) return;
 
-  //   const container = inputRef.current.container;
-  //   container.addEventListener("click", clickListener);
+    const container = inputRef.current.container;
+    container.addEventListener("click", clickListener);
 
-  //   return () => {
-  //     container.removeEventListener("click", clickListener);
-  //   };
-  // }, [inputRef, clickListener]);
+    return () => {
+      container.removeEventListener("click", clickListener);
+    };
+  }, [clickListener]);
 
   // /** add keydown listener */
   // useEffect(() => {
@@ -546,11 +552,13 @@ const CustomTextArea = (props) => {
 
   return (
     <>
-      <h4>Is editing middle: {isEditingMiddle ? "true" : "false"}</h4>
-      <h4>All Selected: {isAllSelected ? "true" : "false"}</h4>
-      <h4>Text selected: {isTextSelected ? "true" : "false"}</h4>
-      <h4>Start position: {startPosition}</h4>
-      <h4>End position: {endPosition}</h4>
+      <div style={{ marginBottom: "3rem" }}>
+        <h4>✏️ Is_Editing_Middle: {isEditingMiddle ? "true" : "false"}</h4>
+        <h4>📉 All Selected: {isAllSelected ? "true" : "false"}</h4>
+        <h4>📖 Text selected: {isTextSelected ? "true" : "false"}</h4>
+        <h4>📌 Start position: {startPosition}</h4>
+        <h4>📌 position: {endPosition}</h4>
+      </div>
       <div
         style={{
           fontFamily: "'Poppins'",
@@ -571,13 +579,20 @@ const CustomTextArea = (props) => {
           cursor: "text",
         }}
         onClick={() => {
-          console.log("[event]:[click]:[textarea_div]")
-          if (isEditingMiddle) return;
+          console.log("[event]:[click]:[textarea_div]");
+
+          if (isEditingMiddle) {
+            console.log("[edit_middle_text]");
+            return;
+          }
+
           if (value.trim().length === 0) {
+            console.log("value is null");
             inputRef.current.focus();
             return;
           }
-          // putCursorAtEndOfDiv();
+
+          putCursorAtEndOfDiv();
         }}
       >
         <MarkedInput
