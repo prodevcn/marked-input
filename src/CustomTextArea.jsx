@@ -131,6 +131,7 @@ const CustomTextArea = (props) => {
   }, [setCursorPosition, value.length]);
 
   const onChange = (text) => {
+    console.log("[function_call]:[on_change]:[text]:", text);
     const position = findLastEditablePosition(value, text);
     setCursorPosition(position);
     setValue(text);
@@ -203,6 +204,12 @@ const CustomTextArea = (props) => {
   const clickListener = useCallback(
     (event) => {
       console.log("[event]:[mouse_click]");
+
+      if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+        console.log("[prevent]:[mouse_click]");
+        return;
+      }
+
       const span = event.target;
       const text = span.innerText;
       const position = getCaretCharacterOffsetWithin(span);
@@ -217,7 +224,14 @@ const CustomTextArea = (props) => {
       setCursorPosition(index + position);
       setIsEditingMiddle(true);
     },
-    [value, setCursorPosition, setIsEditingMiddle]
+    [
+      value,
+      setCursorPosition,
+      setIsEditingMiddle,
+      isTextSelected,
+      startPosition,
+      endPosition,
+    ]
   );
 
   const keyDownListener = useCallback(
@@ -225,14 +239,10 @@ const CustomTextArea = (props) => {
       console.log("[event]:[key_down]");
 
       if (event.ctrlKey && event.key === "a") {
-        console.log("[event]:[key_down]:[ctrl + a]");
-
         setAllSelected(true);
-        setTimeout(() => {
-          console.log("[select_all_text]:", isAllSelected);
-        }, 1000);
       } else if (checkApple() && event.metaKey && event.key === "a") {
         console.log("[event]:[key_down]:[cmd + a]");
+        event.preventDefault();
         const container = inputRef.current.container;
         const spanElements = container.querySelectorAll(".mk-input span");
         const startNode = spanElements[0].firstChild;
@@ -245,14 +255,17 @@ const CustomTextArea = (props) => {
         var selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
+        setAllSelected(true);
       } else if (event.key === "Delete") {
         console.log("[event]:[key_down]:[delete]");
         console.log("[select_all_text]:", isAllSelected);
         if (isAllSelected) {
-          event.preventDefault();
+          console.log("[selected_all_text]");
           setValue("");
           setAllSelected(false);
+          // event.preventDefault();
         } else if (isTextSelected && startPosition && endPosition) {
+          event.preventDefault();
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
           setTextSelected(false);
           setStartPosition(null);
@@ -262,9 +275,18 @@ const CustomTextArea = (props) => {
         }
       } else if (event.key === "Backspace") {
         if (isAllSelected) {
+          console.log("*************");
           event.preventDefault();
           setValue("");
           setAllSelected(false);
+        } else if (isTextSelected && startPosition && endPosition) {
+          event.preventDefault();
+          setValue(value.slice(0, startPosition) + value.slice(endPosition));
+          setTextSelected(false);
+          setStartPosition(null);
+          setEndPosition(null);
+        } else {
+          console.log("###############################");
         }
       }
     },
@@ -455,6 +477,14 @@ const CustomTextArea = (props) => {
         </h1>
       )}
       <div
+        className="pause-button"
+        onClick={() => {
+          setValue("");
+        }}
+      >
+        Format
+      </div>
+      <div
         style={{
           fontFamily: "'Poppins'",
           width: "30%",
@@ -486,7 +516,9 @@ const CustomTextArea = (props) => {
           ref={inputRef}
           Mark={RemovableMark}
           value={value}
-          onChange={onChange}
+          onChange={(e) => {
+            onChange(e);
+          }}
         />
       </div>
     </>

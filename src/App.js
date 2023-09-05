@@ -33,8 +33,8 @@ const App = () => {
 
   return (
     <>
-      <h2>Audio Text</h2>
-      <p>{audioText}</p>
+      <h4>Audio Text : {audioText}</h4>
+      <h4>Value : {value}</h4>
       <CustomTextArea
         value={value}
         setValue={setValue}
