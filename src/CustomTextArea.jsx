@@ -26,7 +26,7 @@ const CustomTextArea = (props) => {
     setTextSelected(false);
     startPosition(null);
     endPosition(null);
-  }
+  };
 
   const checkApple = () => {
     const expression = /(Mac|iPhone|iPod|iPad)/i;
@@ -307,8 +307,10 @@ const CustomTextArea = (props) => {
         if (spanElements.length === 1 && spanElements[0].firstChild === null)
           return;
 
-        const startNode = spanElements[0].firstChild;
-        const endNode = spanElements[spanElements.length - 1].firstChild;
+        const startNode = spanElements[0].firstChild ?? spanElements[1].firstChild;
+        const endNode =
+          spanElements[spanElements.length - 1].firstChild ??
+          spanElements[spanElements.length - 2].firstChild;
 
         const range = document.createRange();
         range.setStart(startNode, 0);
@@ -317,6 +319,7 @@ const CustomTextArea = (props) => {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
+        
         setAllSelected(true);
       } else if (checkApple() && event.metaKey && event.key === "c") {
         event.preventDefault();
