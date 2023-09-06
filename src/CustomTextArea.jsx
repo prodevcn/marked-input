@@ -22,6 +22,12 @@ const CustomTextArea = (props) => {
   const [startPosition, setStartPosition] = useState(null);
   const [endPosition, setEndPosition] = useState(null);
 
+  const clearTextSelection = () => {
+    setTextSelected(false);
+    startPosition(null);
+    endPosition(null);
+  }
+
   const checkApple = () => {
     const expression = /(Mac|iPhone|iPod|iPad)/i;
     return expression.test(navigator.userAgent);
@@ -260,7 +266,7 @@ const CustomTextArea = (props) => {
 
         const range = document.createRange();
         range.setStart(startNode, 0);
-        range.setEnd(endNode, 1);
+        range.setEnd(endNode, endNode.length);
 
         const selection = window.getSelection();
         selection.removeAllRanges();
@@ -342,7 +348,6 @@ const CustomTextArea = (props) => {
         if (isAllSelected) {
           console.log("[selected_all_text]");
 
-          event.preventDefault();
           setValue("");
           setAllSelected(false);
         } else if (isTextSelected && startPosition && endPosition) {
