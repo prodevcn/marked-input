@@ -316,6 +316,9 @@ const CustomTextArea = (props) => {
         range.setStart(startNode, 0);
         range.setEnd(endNode, endNode.length);
 
+        console.log(startNode);
+        console.log(endNode);
+
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
