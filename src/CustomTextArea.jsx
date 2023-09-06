@@ -321,8 +321,9 @@ const CustomTextArea = (props) => {
 
         const selection = window.getSelection();
         selection.removeAllRanges();
+        selection.collapse(false);
         selection.addRange(range);
-        
+
         setAllSelected(true);
       } else if (checkApple() && event.metaKey && event.key === "c") {
         event.preventDefault();
