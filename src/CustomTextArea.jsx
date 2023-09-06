@@ -321,7 +321,7 @@ const CustomTextArea = (props) => {
 
         const selection = window.getSelection();
         selection.removeAllRanges();
-        selection.collapse(false);
+        range.collapse(false);
         selection.addRange(range);
 
         setAllSelected(true);
