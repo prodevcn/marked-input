@@ -33,7 +33,6 @@ const App = () => {
 
   return (
     <div className="main">
-      <h4>🎵 Audio Text : {audioText}</h4>
       <h4>📖 Text : {value}</h4>
       <CustomTextArea
         value={value}

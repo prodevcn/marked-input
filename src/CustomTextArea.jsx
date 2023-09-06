@@ -78,6 +78,8 @@ const CustomTextArea = (props) => {
   };
 
   const putCursorAtMiddle = useCallback(() => {
+    console.log("[input_ref]:[set_cursor_middle]");
+
     if (!inputRef.current) return;
 
     setTimeout(() => {
@@ -205,7 +207,7 @@ const CustomTextArea = (props) => {
   /** event listeners */
   const clickListener = useCallback(
     (event) => {
-      console.log("[event]:[click]");
+      console.log("[input_ref]:[event]:[click]");
 
       // if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
       //   console.log("[prevent]:[click]");
@@ -213,7 +215,6 @@ const CustomTextArea = (props) => {
       // }
 
       const span = event.target;
-      console.log(span);
       const text = span.innerText;
       const position = getCaretCharacterOffsetWithin(span);
       const index = value.indexOf(text);
@@ -223,8 +224,6 @@ const CustomTextArea = (props) => {
         setCursorPosition(value.length + 1);
         return;
       }
-
-      console.log(index + position);
 
       setCursorPosition(index + position);
       setIsEditingMiddle(true);
@@ -246,7 +245,7 @@ const CustomTextArea = (props) => {
       if (event.ctrlKey && event.key === "a") {
         console.log("[event]:[key_ctrl_a]");
 
-        event.preventDefault();
+        // event.preventDefault();
         const container = inputRef.current.container;
         const spanElements = container.querySelectorAll(".mk-input span");
 
@@ -385,7 +384,8 @@ const CustomTextArea = (props) => {
 
   const keyUpListener = useCallback(
     (event) => {
-      console.log("[event]:[key_up]");
+      console.log("[input_ref]:[event]:[key_up]");
+
       if (
         event.key === "ArrowUp" ||
         event.key === "ArrowDown" ||
@@ -395,7 +395,6 @@ const CustomTextArea = (props) => {
         const span = event.target;
         const text = span.innerText;
         const position = getCaretCharacterOffsetWithin(span);
-        console.log(position);
         const index = value.indexOf(text);
         const isEnd = span.className === "mk-input";
 
@@ -404,7 +403,6 @@ const CustomTextArea = (props) => {
           return;
         }
 
-        console.log(index + position);
         setCursorPosition(index + position);
         setIsEditingMiddle(true);
       }
@@ -413,7 +411,8 @@ const CustomTextArea = (props) => {
   );
 
   const mouseListener = () => {
-    console.log("[event]:[mouse_down]");
+    console.log("[input_ref]:[event]:[mouse_down]");
+
     const container = inputRef.current.container;
     let startCursorPosition = 0;
     let endCursorPosition = 0;
@@ -492,28 +491,28 @@ const CustomTextArea = (props) => {
   }, [clickListener]);
 
   // /** add keydown listener */
-  // useEffect(() => {
-  //   if (!inputRef.current) return;
+  useEffect(() => {
+    if (!inputRef.current) return;
 
-  //   const container = inputRef.current.container;
-  //   container.addEventListener("keydown", keyDownListener);
+    const container = inputRef.current.container;
+    container.addEventListener("keydown", keyDownListener);
 
-  //   return () => {
-  //     container.removeEventListener("keydown", keyDownListener);
-  //   };
-  // }, [keyDownListener]);
+    return () => {
+      container.removeEventListener("keydown", keyDownListener);
+    };
+  }, [keyDownListener]);
 
-  // /** add keyup listener */
-  // useEffect(() => {
-  //   if (!inputRef.current) return;
+  /** add keyup listener */
+  useEffect(() => {
+    if (!inputRef.current) return;
 
-  //   const container = inputRef.current.container;
-  //   container.addEventListener("keyup", keyUpListener);
+    const container = inputRef.current.container;
+    container.addEventListener("keyup", keyUpListener);
 
-  //   return () => {
-  //     container.removeEventListener("keyup", keyUpListener);
-  //   };
-  // }, [keyUpListener]);
+    return () => {
+      container.removeEventListener("keyup", keyUpListener);
+    };
+  }, [keyUpListener]);
 
   // /** add mouse down listener */
   // useEffect(() => {
@@ -527,22 +526,23 @@ const CustomTextArea = (props) => {
   //   };
   // }, [inputRef, value]);
 
-  // useEffect(() => {
-  //   if (pausePosition === value.length) putCursorAtEndOfDiv();
-  //   else putCursorAtMiddle();
-  // }, [pauseClickCount]);
+  useEffect(() => {
+    if (cursorPosition === value.length) putCursorAtEndOfDiv();
+    else putCursorAtMiddle();
+  }, [pauseClickCount]);
 
-  // useEffect(() => {
-  //   if (!shouldUpdateInnerValue) return;
-  //   if (!inputRef.current) return;
+  useEffect(() => {
+    console.log("[***** I am not sure why this method is needed *****]");
+    if (!shouldUpdateInnerValue) return;
+    if (!inputRef.current) return;
 
-  //   const container = inputRef.current.container;
-  //   const spanElement = container.querySelector(".mk-input span");
+    const container = inputRef.current.container;
+    const spanElement = container.querySelector(".mk-input span");
 
-  //   // Update the value of the span element
-  //   spanElement.textContent = value;
-  //   setShouldUpdateInnerValue(false);
-  // }, [shouldUpdateInnerValue, setShouldUpdateInnerValue, value]);
+    // Update the value of the span element
+    spanElement.textContent = value;
+    setShouldUpdateInnerValue(false);
+  }, [shouldUpdateInnerValue]);
 
   useEffect(() => {
     setAudioText(
@@ -579,7 +579,7 @@ const CustomTextArea = (props) => {
           cursor: "text",
         }}
         onClick={() => {
-          console.log("[event]:[click]:[textarea_div]");
+          console.log("[custom_textarea]:[event]:[click]");
 
           if (isEditingMiddle) {
             console.log("[edit_middle_text]");
