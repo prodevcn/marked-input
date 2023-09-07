@@ -236,7 +236,7 @@ const CustomTextArea = (props) => {
       //   return;
       // }
 
-      if (isSafari) setNormalText()
+      if (isSafari) setNormalText();
 
       const span = event.target;
       const text = span.innerText;
@@ -324,7 +324,7 @@ const CustomTextArea = (props) => {
         const spanElements = container.querySelectorAll(".mk-input span");
 
         if (isSafari) {
-          setSelectableText()
+          setSelectableText();
         }
 
         if (spanElements.length === 1 && spanElements[0].firstChild === null)
@@ -549,16 +549,16 @@ const CustomTextArea = (props) => {
   }, [keyUpListener]);
 
   // /** add mouse down listener */
-  // useEffect(() => {
-  //   if (!inputRef.current) return;
+  useEffect(() => {
+    if (!inputRef.current) return;
 
-  //   const container = inputRef.current.container;
-  //   container.addEventListener("mousedown", mouseListener);
+    const container = inputRef.current.container;
+    container.addEventListener("mousedown", mouseListener);
 
-  //   return () => {
-  //     container.removeEventListener("mousedown", mouseListener);
-  //   };
-  // }, [inputRef, value]);
+    return () => {
+      container.removeEventListener("mousedown", mouseListener);
+    };
+  }, []);
 
   useEffect(() => {
     if (cursorPosition === value.length) putCursorAtEndOfDiv();
@@ -625,6 +625,8 @@ const CustomTextArea = (props) => {
             inputRef.current.focus();
             return;
           }
+
+          if (isTextSelected && startPosition && endPosition) return;
 
           putCursorAtEndOfDiv();
         }}
