@@ -211,6 +211,7 @@ const CustomTextArea = (props) => {
   };
 
   const setSelectableText = () => {
+    console.log("[set_contenteditable_false]");
     const container = inputRef.current.container;
     const spanElements = container.querySelectorAll(".mk-input span");
     spanElements.forEach((item) => {
@@ -224,7 +225,10 @@ const CustomTextArea = (props) => {
     const spanElements = container.querySelectorAll(".mk-input span");
     spanElements.forEach((item) => {
       // item.style.webkitUserSelect = "text";
-      if (item.firstChild === null || !item.firstChild.nodeValue.includes("\u00D7")) {
+      if (
+        item.firstChild === null ||
+        !item.firstChild.nodeValue.includes("\u00D7")
+      ) {
         item.contentEditable = "true";
       }
     });
@@ -446,7 +450,7 @@ const CustomTextArea = (props) => {
     console.log("[input_ref]:[event]:[mouse_down]");
 
     const container = inputRef.current.container;
-    
+
     let startCursorPosition = 0;
     let endCursorPosition = 0;
 
