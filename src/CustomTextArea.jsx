@@ -453,6 +453,9 @@ const CustomTextArea = (props) => {
 
     const handleMouseMove = () => {
       console.log("[event]:[mouse_move]");
+
+      if (isSafari) setSelectableText();
+
       const selection = window.getSelection();
       const range = selection.getRangeAt(0);
       const spanElements = container.querySelectorAll(".mk-input span");
