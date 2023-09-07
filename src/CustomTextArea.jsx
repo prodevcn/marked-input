@@ -28,10 +28,10 @@ const CustomTextArea = (props) => {
     endPosition(null);
   };
 
-  const checkApple = () => {
-    const expression = /(Mac|iPhone|iPod|iPad)/i;
-    return expression.test(navigator.userAgent);
-  };
+  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(
+    navigator.userAgent
+  );
+  const isApple = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent);
 
   const getCaretCharacterOffsetWithin = (element) => {
     var caretOffset = 0;
@@ -297,12 +297,19 @@ const CustomTextArea = (props) => {
           setStartPosition(0);
           setEndPosition(0);
         }
-      } else if (checkApple() && event.metaKey && event.key === "a") {
+      } else if (isApple && event.metaKey && event.key === "a") {
         console.log("[event]:[cmd + a]");
 
         event.preventDefault();
         const container = inputRef.current.container;
         const spanElements = container.querySelectorAll(".mk-input span");
+
+        if (isSafari) {
+          spanElements.forEach((item) => {
+            // item.contentEditable = "false";
+            item.style.webkitUserSelect = "all";
+          })
+        }
 
         if (spanElements.length === 1 && spanElements[0].firstChild === null)
           return;
@@ -316,17 +323,12 @@ const CustomTextArea = (props) => {
         range.setStart(startNode, 0);
         range.setEnd(endNode, endNode.length);
 
-        console.log(startNode);
-        console.log(endNode);
-
         const selection = window.getSelection();
         selection.removeAllRanges();
-        setTimeout(function() {
-          selection.addRange(range);
-        }, 100);
-
+        selection.addRange(range);
+        
         setAllSelected(true);
-      } else if (checkApple() && event.metaKey && event.key === "c") {
+      } else if (isApple && event.metaKey && event.key === "c") {
         event.preventDefault();
         if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
           navigator.clipboard.writeText(
@@ -335,7 +337,7 @@ const CustomTextArea = (props) => {
         } else if (isAllSelected) {
           navigator.clipboard.writeText(value);
         }
-      } else if (checkApple() && event.metaKey && event.key === "x") {
+      } else if (isApple && event.metaKey && event.key === "x") {
         event.preventDefault();
         if (isAllSelected) {
           navigator.clipboard.writeText(value);
@@ -392,6 +394,8 @@ const CustomTextArea = (props) => {
       isAllSelected,
       setAllSelected,
       isTextSelected,
+      isApple,
+      isSafari,
     ]
   );
 
