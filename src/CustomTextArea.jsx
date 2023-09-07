@@ -22,11 +22,11 @@ const CustomTextArea = (props) => {
   const [startPosition, setStartPosition] = useState(null);
   const [endPosition, setEndPosition] = useState(null);
 
-  const clearTextSelection = () => {
+  const clearTextSelection = useCallback(() => {
     setTextSelected(false);
     startPosition(null);
     endPosition(null);
-  };
+  }, [setTextSelected, startPosition, endPosition]);
 
   const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(
     navigator.userAgent
@@ -214,7 +214,8 @@ const CustomTextArea = (props) => {
     const container = inputRef.current.container;
     const spanElements = container.querySelectorAll(".mk-input span");
     spanElements.forEach((item) => {
-      item.style.webkitUserSelect = "all";
+      // item.style.webkitUserSelect = "all";
+      item.contentEditable = "false";
     });
   };
 
@@ -222,7 +223,10 @@ const CustomTextArea = (props) => {
     const container = inputRef.current.container;
     const spanElements = container.querySelectorAll(".mk-input span");
     spanElements.forEach((item) => {
-      item.style.webkitUserSelect = "text";
+      // item.style.webkitUserSelect = "text";
+      if (item.firstChild === null || !item.firstChild.nodeValue.includes("\u00D7")) {
+        item.contentEditable = "true";
+      }
     });
   };
 
@@ -230,11 +234,6 @@ const CustomTextArea = (props) => {
   const clickListener = useCallback(
     (event) => {
       console.log("[input_ref]:[event]:[click]");
-
-      // if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
-      //   console.log("[prevent]:[click]");
-      //   return;
-      // }
 
       if (isSafari) setNormalText();
 
@@ -312,9 +311,7 @@ const CustomTextArea = (props) => {
             value.slice(startPosition, endPosition + 1)
           );
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
-          setTextSelected(false);
-          setStartPosition(0);
-          setEndPosition(0);
+          clearTextSelection();
         }
       } else if (isApple && event.metaKey && event.key === "a") {
         console.log("[event]:[cmd + a]");
@@ -413,6 +410,7 @@ const CustomTextArea = (props) => {
       isTextSelected,
       isApple,
       isSafari,
+      clearTextSelection,
     ]
   );
 
@@ -444,10 +442,11 @@ const CustomTextArea = (props) => {
     [setIsEditingMiddle, setCursorPosition, value]
   );
 
-  const mouseListener = () => {
+  const mouseListener = useCallback(() => {
     console.log("[input_ref]:[event]:[mouse_down]");
 
     const container = inputRef.current.container;
+    
     let startCursorPosition = 0;
     let endCursorPosition = 0;
 
@@ -513,7 +512,7 @@ const CustomTextArea = (props) => {
 
     container.addEventListener("mousemove", handleMouseMove);
     container.addEventListener("mouseup", handleMouseUp);
-  };
+  }, [isSafari]);
 
   /** add click listener */
   useEffect(() => {
@@ -561,7 +560,7 @@ const CustomTextArea = (props) => {
     return () => {
       container.removeEventListener("mousedown", mouseListener);
     };
-  }, []);
+  }, [mouseListener]);
 
   useEffect(() => {
     if (cursorPosition === value.length) putCursorAtEndOfDiv();
