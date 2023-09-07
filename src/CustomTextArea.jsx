@@ -357,7 +357,7 @@ const CustomTextArea = (props) => {
         console.log("[select_all_text]:", isAllSelected);
         if (isAllSelected) {
           console.log("[selected_all_text]");
-
+          event.preventDefault();
           setValue("");
           setAllSelected(false);
         } else if (isTextSelected && startPosition && endPosition) {
