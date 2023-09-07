@@ -210,6 +210,22 @@ const CustomTextArea = (props) => {
     );
   };
 
+  const setSelectableText = () => {
+    const container = inputRef.current.container;
+    const spanElements = container.querySelectorAll(".mk-input span");
+    spanElements.forEach((item) => {
+      item.style.webkitUserSelect = "all";
+    });
+  };
+
+  const setNormalText = () => {
+    const container = inputRef.current.container;
+    const spanElements = container.querySelectorAll(".mk-input span");
+    spanElements.forEach((item) => {
+      item.style.webkitUserSelect = "text";
+    });
+  };
+
   /** event listeners */
   const clickListener = useCallback(
     (event) => {
@@ -219,6 +235,8 @@ const CustomTextArea = (props) => {
       //   console.log("[prevent]:[click]");
       //   return;
       // }
+
+      if (isSafari) setNormalText()
 
       const span = event.target;
       const text = span.innerText;
@@ -238,6 +256,7 @@ const CustomTextArea = (props) => {
       value,
       setCursorPosition,
       setIsEditingMiddle,
+      isSafari,
       // isTextSelected,
       // startPosition,
       // endPosition,
@@ -305,16 +324,14 @@ const CustomTextArea = (props) => {
         const spanElements = container.querySelectorAll(".mk-input span");
 
         if (isSafari) {
-          spanElements.forEach((item) => {
-            // item.contentEditable = "false";
-            item.style.webkitUserSelect = "all";
-          })
+          setSelectableText()
         }
 
         if (spanElements.length === 1 && spanElements[0].firstChild === null)
           return;
 
-        const startNode = spanElements[0].firstChild ?? spanElements[1].firstChild;
+        const startNode =
+          spanElements[0].firstChild ?? spanElements[1].firstChild;
         const endNode =
           spanElements[spanElements.length - 1].firstChild ??
           spanElements[spanElements.length - 2].firstChild;
@@ -326,7 +343,7 @@ const CustomTextArea = (props) => {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        
+
         setAllSelected(true);
       } else if (isApple && event.metaKey && event.key === "c") {
         event.preventDefault();
