@@ -192,7 +192,6 @@ const CustomTextArea = (props) => {
             textAlign: "center",
           }}
           onClick={() => {
-            console.log("===============================>");
             remove();
             setIsEditingMiddle(false);
           }}
@@ -260,7 +259,7 @@ const CustomTextArea = (props) => {
         event.preventDefault();
         if (isTextSelected && startPosition !== null && endPosition !== null) {
           navigator.clipboard.writeText(
-            value.slice(startPosition, endPosition + 1)
+            value.slice(startPosition, endPosition)
           );
         } else if (isAllSelected) {
           navigator.clipboard.writeText(value);
@@ -274,7 +273,7 @@ const CustomTextArea = (props) => {
           setAllSelected(false);
         } else if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
           navigator.clipboard.writeText(
-            value.slice(startPosition, endPosition + 1)
+            value.slice(startPosition, endPosition)
           );
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
           clearTextSelection();
@@ -310,7 +309,7 @@ const CustomTextArea = (props) => {
         event.preventDefault();
         if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
           navigator.clipboard.writeText(
-            value.slice(startPosition, endPosition + 1)
+            value.slice(startPosition, endPosition)
           );
         } else if (isAllSelected) {
           navigator.clipboard.writeText(value);
@@ -324,7 +323,7 @@ const CustomTextArea = (props) => {
           setAllSelected(false);
         } else if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
           navigator.clipboard.writeText(
-            value.slice(startPosition, endPosition + 1)
+            value.slice(startPosition, endPosition)
           );
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
           setTextSelected(false);
@@ -347,7 +346,12 @@ const CustomTextArea = (props) => {
           startPosition !== null &&
           endPosition !== null
         ) {
-          // event.preventDefault();
+          if (
+            value
+              .substring(startPosition, endPosition)
+              .includes("@[Pause 0.2s](default:0)")
+          )
+            event.preventDefault();
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
           clearTextSelection();
         } else {
@@ -365,7 +369,12 @@ const CustomTextArea = (props) => {
           startPosition !== null &&
           endPosition !== null
         ) {
-          event.preventDefault();
+          if (
+            value
+              .substring(startPosition, endPosition)
+              .includes("@[Pause 0.2s](default:0)")
+          )
+            event.preventDefault();
           setValue(value.slice(0, startPosition) + value.slice(endPosition));
           clearTextSelection();
         } else {
@@ -421,9 +430,11 @@ const CustomTextArea = (props) => {
 
     let startCursorPosition = 0;
     let endCursorPosition = 0;
+    let mouseMoving = false;
 
     const handleMouseMove = () => {
       console.log("[event]:[mouse_move]");
+      mouseMoving = true;
 
       const selection = window.getSelection();
       const range = selection.getRangeAt(0);
@@ -483,22 +494,74 @@ const CustomTextArea = (props) => {
       console.log("[selection]:[start]:", startCursorPosition);
       console.log("[selection]:[end]:", endCursorPosition);
 
-      if (isTextSelected) {
-        // setStartPosition(startCursorPosition);
-        // setEndPosition(endCursorPosition);
+      if (mouseMoving) {
+        console.log("*_*");
+        setStartPosition(startCursorPosition);
+        setEndPosition(endCursorPosition);
+        setIsEditingMiddle(false);
+        mouseMoving = false;
       }
 
       container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("mouseup", handleMouseUp);
-
-      // setTextSelected(true);
-      // setStartPosition(startCursorPosition);
-      // setEndPosition(endCursorPosition);
     };
 
     container.addEventListener("mousemove", handleMouseMove);
     container.addEventListener("mouseup", handleMouseUp);
   }, []);
+
+  const handleTextSelection = () => {
+    if (!inputRef.current) return;
+
+    const container = inputRef.current.container;
+    const spanElements = container.querySelectorAll(".mk-input span");
+    const pauseTagsStart = value
+      .substring(0, startPosition)
+      .match(/Pause 0.2s/g);
+    const pauseTagsEnd = value.substring(0, endPosition).match(/Pause 0.2s/g);
+    const countOfPauseStart = pauseTagsStart ? pauseTagsStart.length : 0;
+    const countOfPauseEnd = pauseTagsEnd ? pauseTagsEnd.length : 0;
+    const nthStart = countOfPauseStart * 2;
+    const startNode = spanElements[nthStart].firstChild;
+    const nthEnd = countOfPauseEnd * 2;
+    const endNode = spanElements[nthEnd].firstChild;
+
+    let beforeTextStart = "";
+    let beforeTextEnd = "";
+    for (let i = 0; i < nthStart; i++) {
+      if (spanElements[i].firstChild === null) continue;
+      if (spanElements[i].firstChild.nodeValue.includes("\u00D7")) {
+        beforeTextStart = beforeTextStart + "@[Pause 0.2s](default:0)";
+      } else {
+        beforeTextStart =
+          beforeTextStart + spanElements[i].firstChild.nodeValue;
+      }
+    }
+
+    for (let i = 0; i < nthEnd; i++) {
+      if (spanElements[i].firstChild === null) continue;
+      if (spanElements[i].firstChild.nodeValue.includes("\u00D7")) {
+        beforeTextEnd = beforeTextEnd + "@[Pause 0.2s](default:0)";
+      } else {
+        beforeTextEnd = beforeTextEnd + spanElements[i].firstChild.nodeValue;
+      }
+    }
+
+    var range = document.createRange();
+    range.setStart(startNode, startPosition - beforeTextStart.length);
+    range.setEnd(endNode, endPosition - beforeTextEnd.length);
+
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    console.log(beforeTextStart);
+    console.log(startPosition - beforeTextStart.length);
+    console.log(endPosition - beforeTextEnd.length);
+
+    console.log(nthStart);
+    console.log(nthEnd);
+  };
 
   /** add mouse down listener */
   useEffect(() => {
@@ -574,6 +637,7 @@ const CustomTextArea = (props) => {
   return (
     <>
       <div style={{ marginBottom: "3rem" }}>
+        <h4>[ ✏️ ] : [ value ] : {value}</h4>
         <h4>
           [ ✏️ ] : [ is_editing_middle ] : {isEditingMiddle ? "true" : "false"}
         </h4>
@@ -617,10 +681,14 @@ const CustomTextArea = (props) => {
             return;
           }
 
-          if (isTextSelected && startPosition !== 0 && endPosition !== 0)
-            return;
+          if (isTextSelected && startPosition !== 0 && endPosition !== 0) {
+            console.log("******** text selected");
+            handleTextSelection();
+          } else {
+            console.log("_________ text not selected");
+            putCursorAtEndOfDiv();
+          }
 
-          putCursorAtEndOfDiv();
           setAllSelected(false);
         }}
       >
