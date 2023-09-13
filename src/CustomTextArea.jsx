@@ -474,6 +474,7 @@ const CustomTextArea = (props) => {
       }
 
       endCursorPosition = tmp.length + range.endOffset;
+      setTextSelected(true);
     };
 
     const handleMouseUp = () => {
@@ -482,13 +483,17 @@ const CustomTextArea = (props) => {
       console.log("[selection]:[start]:", startCursorPosition);
       console.log("[selection]:[end]:", endCursorPosition);
 
-      setTextSelected(true);
-      setStartPosition(startCursorPosition);
-      setEndPosition(endCursorPosition);
+      if (isTextSelected) {
+        // setStartPosition(startCursorPosition);
+        // setEndPosition(endCursorPosition);
+      }
 
       container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("mouseup", handleMouseUp);
-      container.removeEventListener("mousedown", mouseListener);
+
+      // setTextSelected(true);
+      // setStartPosition(startCursorPosition);
+      // setEndPosition(endCursorPosition);
     };
 
     container.addEventListener("mousemove", handleMouseMove);
