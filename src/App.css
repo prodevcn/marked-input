@@ -7,10 +7,11 @@ body {
   left: 0;
   right: 0;
   background: #191d26;
+  font-family: "Poppins";
 }
 
 .main {
-  width: 30%;
+  width: 50%;
   height: 100vh;
   padding: 2rem 0 0;
   margin: 0 auto;
@@ -20,7 +21,6 @@ body {
 }
 
 .pause-button {
-  width: 100%;
   cursor: pointer;
   color: white;
   margin: 1rem auto;
